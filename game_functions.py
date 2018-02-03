@@ -76,10 +76,15 @@ def check_bullet_alien_collision(ai_settings, screen, ship, aliens, bullets):
         bullets.empty()
         create_fleet(ai_settings, screen, ship, aliens)
 
-def update_aliens(ai_settings, aliens):
+def update_aliens(ai_settings, aliens, ship):
     """Update the aliens new positions and change directions if at edge"""
     check_fleet_edges(ai_settings, aliens)
     aliens.update()
+
+    #Look for alien-ship collisions.
+    if pygame.sprite.spritecollideany(ship, aliens):
+        print("Ship hit!!!")
+
 
 def get_number_aliens_x(ai_settings, alien_width):
     """Determine the number of aliens that fit in a row"""
