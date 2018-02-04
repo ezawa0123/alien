@@ -2,6 +2,37 @@ import sys
 import pygame
 from bullet import Bullet
 from alien import Alien
+from time import sleep
+
+def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
+    """Check if any aliens have reached the bottom of the screen. """
+    screen_rect = screen.get_rect()
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            #Treat this the same as if the ship got hit
+            ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+            break
+
+def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
+    """Respond to ship being hit by alien"""
+   
+    if stats.ships_left > 0:
+        #Decrement ships_left.
+        stats.ships_left -= 1
+
+        #empty the list of aliens and bullets.
+        aliens.empty()
+        bullets.empty()
+    
+        #Create a new fleet and center the ship.
+        create_fleet(ai_settings, screen, ship, aliens)
+        ship.center_ship()
+
+        #Pause.
+        sleep(0.5)
+
+    else:
+        stats.game_active = False
 
 def fire_bullet(ai_settings, screen, ship, bullets):
     """Fire a bullet if the limit is not reached"""
@@ -76,15 +107,18 @@ def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
         bullets.empty()
         create_fleet(ai_settings, screen, ship, aliens)
 
-def update_aliens(ai_settings, aliens, ship):
+def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     """Update the aliens new positions and change directions if at edge"""
     check_fleet_edges(ai_settings, aliens)
     aliens.update()
 
+    #Look for aliens hitting the bottom of the screen.
+    check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
+
     #Look for alien-ship collisions.
     if pygame.sprite.spritecollideany(ship, aliens):
-        print("Ship hit!!!")
-
+        #print("Ship hit!!!")
+        ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
 
 def get_number_aliens_x(ai_settings, alien_width):
     """Determine the number of aliens that fit in a row"""
